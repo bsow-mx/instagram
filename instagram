@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instagram Video Transcription</title>
+  <style>
+    /* CSS Variables & Reset */
+    :root {
+      --primary-color: #3897f0;
+      --secondary-color: #f44336;
+      --accent-color: #4CAF50;
+      --success-color: #27ae60;
+      --bg-color: #fafafa;
+      --container-bg: #ffffff;
+      --text-color: #262626;
+      --border-color: #dbdbdb;
+      --light-text: #8e8e8e;
+    }
+    /* Dark Mode */
+    body.dark {
+      --bg-color: #121212;
+      --container-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --border-color: #333;
+      --light-text: #aaa;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg-color);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+    /* Dark Mode Toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      outline: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: transform 0.2s ease;
+    }
+    .dark-mode-toggle:hover {
+      transform: scale(1.1);
+    }
+    /* Container */
+    .container {
+      background-color: var(--container-bg);
+      max-width: 800px;
+      width: 100%;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.8s ease-out;
+      position: relative;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Headings */
+    h1, h2 {
+      text-align: center;
+      color: var(--text-color);
+      margin-bottom: 30px;
+    }
+    /* URL Input */
+    .url-input {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .url-input input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      background-color: transparent;
+      color: var(--text-color);
+    }
+    .url-input input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .url-input button.remove-btn {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0 15px;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .url-input button.remove-btn:hover {
+      transform: scale(1.03);
+    }
+    .thumbnail-preview {
+      width: 50px;
+      height: 50px;
+      margin-left: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      object-fit: cover;
+      display: none;
+    }
+    /* Buttons */
+    .add-url, .start-button, .settings-btn {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 15px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .start-button {
+      background-color: var(--primary-color);
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .add-url:hover, .start-button:hover, .settings-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    /* Settings Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+    .modal-content {
+      background-color: var(--container-bg);
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      animation: fadeIn 0.4s ease;
+    }
+    .modal-close {
+      float: right;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    /* Progress */
+    .progress-container {
+      margin-top: 30px;
+      display: none;
+    }
+    .progress-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    .progress-bar {
+      height: 20px;
+      background-color: #efefef;
+      border-radius: 10px;
+      margin-bottom: 5px;
+      overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-status {
+      font-size: 14px;
+      color: var(--light-text);
+    }
+    /* Live Transcription Preview */
+    .live-transcript {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: var(--text-color);
+      display: none;
+    }
+    /* Transcript Results */
+    .results-container {
+      margin-top: 30px;
+      display: none;
+    }
+    .transcript-item {
+      background-color: #f9f9f9;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .transcript-url {
+      font-weight: bold;
+      margin-bottom: 10px;
+      word-break: break-all;
+      color: var(--text-color);
+    }
+    .transcript-text {
+      white-space: pre-wrap;
+      color: var(--text-color);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .btn-group button {
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: transform 0.2s ease;
+    }
+    .btn-group button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    /* Social Sharing Buttons */
+    .social-share {
+      margin-top: 10px;
+    }
+    .social-share button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      margin-right: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .social-share button:hover {
+      transform: scale(1.03);
+    }
+    /* Transcript History */
+    .history-container {
+      margin-top: 30px;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+    }
+    .history-item {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    .clear-history {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .clear-history:hover {
+      transform: scale(1.03);
+    }
+    /* Back to Top */
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      z-index: 1002;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .notification.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Dark Mode Toggle -->
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">🌓</button>
+  <div class="container">
+    <h1>Instagram Video Transcription</h1>
+    <!-- Settings Button -->
+    <button class="settings-btn" onclick="openSettings()" aria-label="Open Settings">Settings</button>
+    
+    <!-- URL Input Section -->
+    <div id="url-container">
+      <div class="url-input">
+        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
+        <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
+        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
+      </div>
+    </div>
+    <button class="add-url" onclick="addURLField()" aria-label="Add Another URL">+ Add Another URL</button>
+    <button class="start-button" onclick="startTranscription()" aria-label="Start Transcription">Start Transcription</button>
+    
+    <!-- Progress & Live Preview -->
+    <div class="progress-container" id="progress-container">
+      <p class="progress-title">Transcription Progress</p>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" id="progress-bar"></div>
+      </div>
+      <p class="progress-status" id="progress-status">Processing... (0/0)</p>
+    </div>
+    <div class="live-transcript" id="live-transcript"></div>
+    
+    <!-- Transcription Results -->
+    <div class="results-container" id="results-container">
+      <h2>Transcription Results</h2>
+      <div id="transcript-results"></div>
+    </div>
+    
+    <!-- Transcript History -->
+    <div class="history-container" id="history-container" style="display:none;">
+      <div class="history-header">
+        <h2>Transcript History</h2>
+        <button class="clear-history" onclick="clearHistory()" aria-label="Clear History">Clear</button>
+      </div>
+      <div id="history-items"></div>
+    </div>
+  </div>
+  
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="back-to-top" onclick="scrollToTop()" aria-label="Back to Top">↑</button>
+  
+  <!-- Settings Modal -->
+  <div class="modal" id="settings-modal" aria-modal="true" role="dialog">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeSettings()" aria-label="Close Settings">&times;</span>
+      <h2>Settings</h2>
+      <label for="language">Transcription Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <!-- More languages as needed -->
+      </select>
+      <br/><br/>
+      <label for="punctuation">Punctuation:</label>
+      <input type="checkbox" id="punctuation" checked>
+      <br/><br/>
+      <button onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+  
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+  
+  <!-- jsPDF for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <script>
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+    }
+    
+    // Settings Modal Functions
+    function openSettings() {
+      document.getElementById('settings-modal').style.display = 'flex';
+    }
+    function closeSettings() {
+      document.getElementById('settings-modal').style.display = 'none';
+    }
+    function saveSettings() {
+      const language = document.getElementById('language').value;
+      const punctuation = document.getElementById('punctuation').checked;
+      localStorage.setItem('transcriptionSettings', JSON.stringify({ language, punctuation }));
+      showNotification("Settings saved");
+      closeSettings();
+    }
+    
+    // Notification Function
+    function showNotification(message) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.add('show');
+      setTimeout(() => { notification.classList.remove('show'); }, 3000);
+    }
+    
+    // Add & Remove URL Inputs with Thumbnail Preview
+    function addURLField() {
+      const container = document.getElementById("url-container");
+      const urlDiv = document.createElement("div");
+      urlDiv.className = "url-input";
+      urlDiv.innerHTML = `
+        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
+        <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
+        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
+      `;
+      urlDiv.querySelector("input").addEventListener("blur", function() {
+        updateThumbnail(this);
+      });
+      container.appendChild(urlDiv);
+    }
+    
+    function removeURLField(button) {
+      const container = document.getElementById("url-container");
+      if (container.children.length > 1) {
+        container.removeChild(button.parentElement);
+      }
+    }
+    
+    // Update Thumbnail Preview Based on URL Pattern
+    function updateThumbnail(input) {
+      const url = input.value.trim();
+      const thumb = input.parentElement.querySelector('.thumbnail-preview');
+      if (url && url.includes("instagram.com")) {
+        const match = url.match(/\/p\/([^\/]+)/);
+        if (match && match[1]) {
+          thumb.src = `https://instagram.com/p/${match[1]}/media/?size=t`;
+          thumb.style.display = "block";
+        } else {
+          thumb.style.display = "none";
+        }
+      } else {
+        thumb.style.display = "none";
+      }
+    }
+    
+    // Update Live Transcription Preview (if partial transcript provided)
+    function updateLiveTranscript(text) {
+      const liveDiv = document.getElementById("live-transcript");
+      liveDiv.style.display = "block";
+      liveDiv.textContent = text;
+    }
+    
+    // Main Transcription Process
+    async function startTranscription() {
+      const inputs = document.querySelectorAll("#url-container input[type='url']");
+      const urls = Array.from(inputs).map(i => i.value.trim()).filter(url => url !== "");
+      if (urls.length === 0) {
+        showNotification("Please enter at least one Instagram URL");
+        return;
+      }
+      for (let url of urls) {
+        if (!url.includes("instagram.com")) {
+          showNotification("Please enter valid Instagram URLs");
+          return;
+        }
+      }
+      
+      document.getElementById("progress-container").style.display = "block";
+      const progressBar = document.getElementById("progress-bar");
+      const progressStatus = document.getElementById("progress-status");
+      const resultsContainer = document.getElementById("results-container");
+      const transcriptResults = document.getElementById("transcript-results");
+      transcriptResults.innerHTML = "";
+      resultsContainer.style.display = "none";
+      document.getElementById("live-transcript").style.display = "none";
+      
+      try {
+        const settings = JSON.parse(localStorage.getItem('transcriptionSettings')) || { language: 'en', punctuation: true };
+        const response = await fetch('http://localhost:3000/api/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls, settings })
+        });
+        const { jobIds } = await response.json();
+        const results = [];
+        for (let jobId of jobIds) {
+          let job;
+          do {
+            const statusResponse = await fetch(`http://localhost:3000/api/status/${jobId}`);
+            job = await statusResponse.json();
+            progressBar.style.width = `${job.progress}%`;
+            progressStatus.textContent = `Processing... ${job.status}`;
+            if (job.partialTranscript) {
+              updateLiveTranscript(job.partialTranscript);
+            }
+            await new Promise(r => setTimeout(r, 3000));
+          } while (job.status !== 'completed' && job.status !== 'error');
+          
+          if (job.status === 'completed') {
+            results.push({ url: job.url, transcript: job.transcript });
+          } else {
+            results.push({ url: job.url, error: job.error || 'Failed to process' });
+          }
+        }
+        resultsContainer.style.display = "block";
+        for (let result of results) {
+          const item = document.createElement("div");
+          item.className = "transcript-item";
+          const urlElem = document.createElement("div");
+          urlElem.className = "transcript-url";
+          urlElem.textContent = result.url;
+          item.appendChild(urlElem);
+          if (result.error) {
+            const errElem = document.createElement("div");
+            errElem.className = "error-message";
+            errElem.textContent = `Error: ${result.error}`;
+            item.appendChild(errElem);
+          } else {
+            const textElem = document.createElement("div");
+            textElem.className = "transcript-text";
+            textElem.textContent = result.transcript;
+            item.appendChild(textElem);
+            // Buttons for Download, Copy, Export PDF, and Import to ChatGPT
+            const btnGroup = document.createElement("div");
+            btnGroup.className = "btn-group";
+            const downloadBtn = document.createElement("button");
+            downloadBtn.textContent = "Download";
+            downloadBtn.onclick = () => downloadTranscript(result.url, result.transcript);
+            btnGroup.appendChild(downloadBtn);
+            const copyBtn = document.createElement("button");
+            copyBtn.textContent = "Copy";
+            copyBtn.onclick = () => copyTranscript(result.transcript);
+            btnGroup.appendChild(copyBtn);
+            const pdfBtn = document.createElement("button");
+            pdfBtn.textContent = "Export PDF";
+            pdfBtn.onclick = () => exportPDF(result.url, result.transcript);
+            btnGroup.appendChild(pdfBtn);
+            const importBtn = document.createElement("button");
+            importBtn.textContent = "Import to ChatGPT";
+            importBtn.onclick = () => importToChatGPT(result.transcript);
+            btnGroup.appendChild(importBtn);
+            item.appendChild(btnGroup);
+            
+            // Social Sharing Button (Twitter)
+            const shareDiv = document.createElement("div");
+            shareDiv.className = "social-share";
+            const twitterBtn = document.createElement("button");
+            twitterBtn.textContent = "Share on Twitter";
+            twitterBtn.onclick = () => shareOnTwitter(result.transcript);
+            shareDiv.appendChild(twitterBtn);
+            item.appendChild(shareDiv);
+            
+            // Save transcript to history
+            saveToHistory(result);
+          }
+          transcriptResults.appendChild(item);
+        }
+        progressStatus.textContent = "Transcription Completed";
+        document.getElementById("back-to-top").style.display = "flex";
+      } catch (error) {
+        console.error('Transcription error:', error);
+        showNotification("Failed to transcribe videos");
+      }
+    }
+    
+    // Download Transcript as Text File
+    function downloadTranscript(url, transcript) {
+      let filename = "transcript";
+      const match = url.match(/\/p\/([^\/]+)/);
+      if (match && match[1]) {
+        filename = `instagram_${match[1]}_transcript`;
+      }
+      const element = document.createElement('a');
+      const file = new Blob([transcript], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `${filename}.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+    
+    // Copy Transcript to Clipboard
+    function copyTranscript(transcript) {
+      navigator.clipboard.writeText(transcript)
+        .then(() => showNotification("Transcript copied to clipboard"))
+        .catch(() => showNotification("Failed to copy transcript"));
+    }
+    
+    // Export Transcript as PDF using jsPDF
+    function exportPDF(url, transcript) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text(transcript, 10, 10);
+      let filename = "transcript";
+      const match = url.match(/\/p\/([^\/]+)/);
+      if (match && match[1]) {
+        filename = `instagram_${match[1]}_transcript`;
+      }
+      doc.save(`${filename}.pdf`);
+    }
+    
+    // Import Transcript to ChatGPT: Copy transcript and open ChatGPT
+    function importToChatGPT(transcript) {
+      navigator.clipboard.writeText(transcript)
+        .then(() => {
+          window.open('https://chat.openai.com/', '_blank');
+          showNotification("Transcript copied! Paste it into ChatGPT.");
+        })
+        .catch(() => showNotification("Failed to copy transcript."));
+    }
+    
+    // Social Sharing on Twitter
+    function shareOnTwitter(transcript) {
+      const tweet = encodeURIComponent(transcript.substring(0, 240));
+      const shareUrl = `https://twitter.com/intent/tweet?text=${tweet}`;
+      window.open(shareUrl, '_blank');
+    }
+    
+    // Save Transcript to History (localStorage)
+    function saveToHistory(result) {
+      let history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
+      history.push(result);
+      localStorage.setItem('transcriptHistory', JSON.stringify(history));
+      displayHistory();
+    }
+    
+    // Display Transcript History
+    function displayHistory() {
+      const history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
+      const container = document.getElementById('history-items');
+      container.innerHTML = "";
+      history.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.textContent = item.url;
+        container.appendChild(div);
+      });
+      document.getElementById('history-container').style.display = history.length ? "block" : "none";
+    }
+    
+    // Clear Transcript History
+    function clearHistory() {
+      localStorage.removeItem('transcriptHistory');
+      displayHistory();
+      showNotification("History cleared");
+    }
+    
+    // Scroll to Top Functionality
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Back-to-Top Button Visibility
+    window.addEventListener('scroll', () => {
+      document.getElementById("back-to-top").style.display = window.scrollY > 300 ? "flex" : "none";
+    });
+    
+    // Initialize: Set blur event for initial URL input & display history
+    document.querySelectorAll("#url-container input[type='url']").forEach(input => {
+      input.addEventListener("blur", function() { updateThumbnail(this); });
+    });
+    displayHistory();
+  </script>
+</body>
+</html>
