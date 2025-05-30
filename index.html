@@ -78,28 +78,6 @@
       color: var(--text-color);
       margin-bottom: 30px;
     }
-    .author {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      color: #777;
-    }
-    .author a {
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-    .author a:hover {
-      text-decoration: underline;
-    }
-    .instructions {
-      background-color: #e8f4fd;
-      border-left: 4px solid var(--primary-color);
-      padding: 0.8rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      border-radius: 4px;
-      color: var(--text-color);
-    }
     /* URL Input */
     .url-input {
       display: flex;
@@ -109,25 +87,24 @@
     }
     .url-input input {
       flex-grow: 1;
-      padding: 12px;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
       font-size: 14px;
       transition: border-color 0.3s ease;
-      background-color: var(--container-bg);
+      background-color: transparent;
       color: var(--text-color);
     }
     .url-input input:focus {
       outline: none;
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(56, 151, 240, 0.1);
     }
     .url-input button.remove-btn {
       background-color: var(--secondary-color);
       color: white;
       border: none;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 0 15px;
       margin-left: 10px;
       cursor: pointer;
       transition: transform 0.2s ease;
@@ -135,29 +112,36 @@
     .url-input button.remove-btn:hover {
       transform: scale(1.03);
     }
+    .thumbnail-preview {
+      width: 50px;
+      height: 50px;
+      margin-left: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      object-fit: cover;
+      display: none;
+    }
     /* Buttons */
     .add-url, .start-button, .settings-btn {
       background-color: var(--accent-color);
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 12px 20px;
+      border-radius: 4px;
+      padding: 10px 15px;
       font-size: 14px;
       margin-bottom: 20px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
+      transition: transform 0.2s ease;
     }
     .start-button {
       background-color: var(--primary-color);
       width: 100%;
       font-size: 16px;
       font-weight: bold;
-      padding: 15px;
     }
     .add-url:hover, .start-button:hover, .settings-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     /* Settings Modal */
     .modal {
@@ -174,21 +158,16 @@
     }
     .modal-content {
       background-color: var(--container-bg);
-      padding: 25px;
+      padding: 20px;
       border-radius: 10px;
       width: 90%;
       max-width: 400px;
       animation: fadeIn 0.4s ease;
-      color: var(--text-color);
     }
     .modal-close {
       float: right;
       cursor: pointer;
-      font-size: 24px;
-      color: var(--light-text);
-    }
-    .modal-close:hover {
-      color: var(--text-color);
+      font-size: 20px;
     }
     /* Progress */
     .progress-container {
@@ -217,49 +196,39 @@
       font-size: 14px;
       color: var(--light-text);
     }
+    /* Live Transcription Preview */
+    .live-transcript {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: var(--text-color);
+      display: none;
+    }
     /* Transcript Results */
     .results-container {
       margin-top: 30px;
       display: none;
     }
     .transcript-item {
-      background-color: var(--container-bg);
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background-color: #f9f9f9;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
     }
     .transcript-url {
       font-weight: bold;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       word-break: break-all;
-      color: var(--primary-color);
-      font-size: 14px;
+      color: var(--text-color);
     }
     .transcript-text {
       white-space: pre-wrap;
       color: var(--text-color);
-      line-height: 1.6;
-      margin-bottom: 15px;
-      background-color: var(--bg-color);
-      padding: 15px;
-      border-radius: 6px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .error-message {
-      color: var(--secondary-color);
-      font-weight: 500;
-      background-color: rgba(244, 67, 54, 0.1);
-      padding: 10px;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      line-height: 1.5;
       margin-bottom: 10px;
     }
     .btn-group button {
@@ -270,14 +239,12 @@
       padding: 8px 15px;
       font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      margin-right: 10px;
+      transition: transform 0.2s ease;
     }
     .btn-group button:hover {
-      transform: translateY(-1px);
+      transform: scale(1.03);
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    .btn-group button.chatgpt {
-      background-color: #10a37f;
     }
     /* Social Sharing Buttons */
     .social-share {
@@ -296,26 +263,40 @@
     .social-share button:hover {
       transform: scale(1.03);
     }
-    /* Notification */
-    .notification {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: var(--success-color);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 1002;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+    /* Transcript History */
+    .history-container {
+      margin-top: 30px;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
     }
-    .notification.show {
-      opacity: 1;
+    .history-item {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border-color);
     }
-    .notification.error {
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+    .clear-history {
       background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .clear-history:hover {
+      transform: scale(1.03);
     }
     /* Back to Top */
     .back-to-top {
@@ -336,22 +317,23 @@
       z-index: 1000;
       transition: opacity 0.3s ease;
     }
-    .back-to-top:hover {
-      transform: scale(1.1);
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      z-index: 1002;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      .container {
-        padding: 20px;
-        margin: 10px;
-      }
-      .btn-group {
-        flex-direction: column;
-      }
-      .btn-group button {
-        width: 100%;
-        margin-bottom: 5px;
-      }
+    .notification.show {
+      opacity: 1;
     }
   </style>
 </head>
@@ -360,26 +342,21 @@
   <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">🌓</button>
   <div class="container">
     <h1>Instagram Video Transcription</h1>
-    <p class="author">Created by <a href="https://instagram.com/max.bsow" target="_blank">@max.bsow</a> | Powered by AssemblyAI</p>
-    
-    <div class="instructions">
-      <strong>How to use:</strong> Enter Instagram video URLs and get AI-powered transcriptions. Note: This tool works with publicly accessible Instagram videos.
-    </div>
-    
     <!-- Settings Button -->
-    <button class="settings-btn" onclick="openSettings()" aria-label="Open Settings">⚙️ Settings</button>
+    <button class="settings-btn" onclick="openSettings()" aria-label="Open Settings">Settings</button>
     
     <!-- URL Input Section -->
     <div id="url-container">
       <div class="url-input">
-        <input type="url" placeholder="Enter Instagram video URL (e.g., https://www.instagram.com/p/...)" required aria-label="Instagram URL">
+        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
         <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
+        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
       </div>
     </div>
     <button class="add-url" onclick="addURLField()" aria-label="Add Another URL">+ Add Another URL</button>
-    <button class="start-button" onclick="startTranscription()" aria-label="Start Transcription">🎯 Start Transcription</button>
+    <button class="start-button" onclick="startTranscription()" aria-label="Start Transcription">Start Transcription</button>
     
-    <!-- Progress -->
+    <!-- Progress & Live Preview -->
     <div class="progress-container" id="progress-container">
       <p class="progress-title">Transcription Progress</p>
       <div class="progress-bar">
@@ -387,11 +364,21 @@
       </div>
       <p class="progress-status" id="progress-status">Processing... (0/0)</p>
     </div>
+    <div class="live-transcript" id="live-transcript"></div>
     
     <!-- Transcription Results -->
     <div class="results-container" id="results-container">
-      <h2>📝 Transcription Results</h2>
+      <h2>Transcription Results</h2>
       <div id="transcript-results"></div>
+    </div>
+    
+    <!-- Transcript History -->
+    <div class="history-container" id="history-container" style="display:none;">
+      <div class="history-header">
+        <h2>Transcript History</h2>
+        <button class="clear-history" onclick="clearHistory()" aria-label="Clear History">Clear</button>
+      </div>
+      <div id="history-items"></div>
     </div>
   </div>
   
@@ -403,44 +390,30 @@
     <div class="modal-content">
       <span class="modal-close" onclick="closeSettings()" aria-label="Close Settings">&times;</span>
       <h2>Settings</h2>
-      <label for="language">Transcription Language:</label><br>
-      <select id="language" style="width: 100%; padding: 8px; margin: 10px 0; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--container-bg); color: var(--text-color);">
+      <label for="language">Transcription Language:</label>
+      <select id="language">
         <option value="en">English</option>
         <option value="es">Spanish</option>
-        <option value="fr">French</option>
-        <option value="de">German</option>
-        <option value="it">Italian</option>
-        <option value="pt">Portuguese</option>
-        <option value="ja">Japanese</option>
-        <option value="ko">Korean</option>
-        <option value="zh">Chinese</option>
-        <option value="ar">Arabic</option>
+        <!-- More languages as needed -->
       </select>
-      <br/>
-      <label for="punctuation">
-        <input type="checkbox" id="punctuation" checked> Enable Punctuation
-      </label>
       <br/><br/>
-      <button onclick="saveSettings()" style="background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Save Settings</button>
+      <label for="punctuation">Punctuation:</label>
+      <input type="checkbox" id="punctuation" checked>
+      <br/><br/>
+      <button onclick="saveSettings()">Save Settings</button>
     </div>
   </div>
   
   <!-- Notification -->
   <div class="notification" id="notification"></div>
   
+  <!-- jsPDF for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
   <script>
-    // Your API key
-    const API_KEY = 'b9b496027b404fe8ad26320eddd30eaa';
-    
     // Dark Mode Toggle
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
-      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-    }
-    
-    // Load dark mode preference
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark');
     }
     
     // Settings Modal Functions
@@ -458,30 +431,27 @@
       closeSettings();
     }
     
-    // Load settings
-    function loadSettings() {
-      const settings = JSON.parse(localStorage.getItem('transcriptionSettings')) || { language: 'en', punctuation: true };
-      document.getElementById('language').value = settings.language;
-      document.getElementById('punctuation').checked = settings.punctuation;
-    }
-    
     // Notification Function
-    function showNotification(message, isError = false) {
+    function showNotification(message) {
       const notification = document.getElementById('notification');
       notification.textContent = message;
-      notification.className = isError ? 'notification error show' : 'notification show';
-      setTimeout(() => { notification.classList.remove('show'); }, 4000);
+      notification.classList.add('show');
+      setTimeout(() => { notification.classList.remove('show'); }, 3000);
     }
     
-    // Add & Remove URL Inputs
+    // Add & Remove URL Inputs with Thumbnail Preview
     function addURLField() {
       const container = document.getElementById("url-container");
       const urlDiv = document.createElement("div");
       urlDiv.className = "url-input";
       urlDiv.innerHTML = `
-        <input type="url" placeholder="Enter Instagram video URL (e.g., https://www.instagram.com/p/...)" required aria-label="Instagram URL">
+        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
         <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
+        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
       `;
+      urlDiv.querySelector("input").addEventListener("blur", function() {
+        updateThumbnail(this);
+      });
       container.appendChild(urlDiv);
     }
     
@@ -492,251 +462,223 @@
       }
     }
     
-    // Extract Instagram video URL info
-    function extractInstagramInfo(url) {
-      const match = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
-      return match ? match[1] : null;
-    }
-    
-    // Simulate Instagram video to audio extraction (placeholder)
-    async function extractAudioFromInstagram(url) {
-      // In a real implementation, this would use a service to extract audio from Instagram videos
-      // For now, we'll simulate this process
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const postId = extractInstagramInfo(url);
-          if (postId) {
-            // Simulate successful audio extraction
-            resolve({
-              audioUrl: `https://example.com/audio/${postId}.mp3`, // This would be the actual audio URL
-              title: `Instagram Post ${postId}`,
-              duration: 30 // seconds
-            });
-          } else {
-            reject(new Error('Invalid Instagram URL'));
-          }
-        }, 2000);
-      });
-    }
-    
-    // Upload audio to AssemblyAI (simulated)
-    async function uploadAudioToAssemblyAI(audioUrl) {
-      // In a real implementation, you would download the audio and upload it
-      // For now, we'll use the direct URL approach
-      return audioUrl;
-    }
-    
-    // Start transcription job with AssemblyAI
-    async function startTranscriptionJob(audioUrl, settings) {
-      const response = await fetch('https://api.assemblyai.com/v2/transcript', {
-        method: 'POST',
-        headers: {
-          'authorization': API_KEY,
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          audio_url: audioUrl,
-          language_code: settings.language,
-          punctuate: settings.punctuation,
-          format_text: true
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || `Transcription request failed with status ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.id;
-    }
-    
-    // Poll for transcription results
-    async function pollTranscriptionResult(transcriptId) {
-      let attempts = 0;
-      const maxAttempts = 60; // 5 minutes max
-      
-      while (attempts < maxAttempts) {
-        attempts++;
-        
-        const response = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
-          headers: { 'authorization': API_KEY }
-        });
-        
-        if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || `Polling failed with status ${response.status}`);
+    // Update Thumbnail Preview Based on URL Pattern
+    function updateThumbnail(input) {
+      const url = input.value.trim();
+      const thumb = input.parentElement.querySelector('.thumbnail-preview');
+      if (url && url.includes("instagram.com")) {
+        const match = url.match(/\/p\/([^\/]+)/);
+        if (match && match[1]) {
+          thumb.src = `https://instagram.com/p/${match[1]}/media/?size=t`;
+          thumb.style.display = "block";
+        } else {
+          thumb.style.display = "none";
         }
-        
-        const data = await response.json();
-        
-        if (data.status === 'completed') {
-          return data.text;
-        } else if (data.status === 'error') {
-          throw new Error(data.error || 'Transcription failed');
-        }
-        
-        // Wait before next polling attempt
-        await new Promise(resolve => setTimeout(resolve, 5000));
+      } else {
+        thumb.style.display = "none";
       }
-      
-      throw new Error('Transcription timed out');
+    }
+    
+    // Update Live Transcription Preview (if partial transcript provided)
+    function updateLiveTranscript(text) {
+      const liveDiv = document.getElementById("live-transcript");
+      liveDiv.style.display = "block";
+      liveDiv.textContent = text;
     }
     
     // Main Transcription Process
     async function startTranscription() {
       const inputs = document.querySelectorAll("#url-container input[type='url']");
       const urls = Array.from(inputs).map(i => i.value.trim()).filter(url => url !== "");
-      
       if (urls.length === 0) {
-        showNotification("Please enter at least one Instagram URL", true);
+        showNotification("Please enter at least one Instagram URL");
         return;
       }
-      
-      // Validate URLs
       for (let url of urls) {
-        if (!url.includes("instagram.com") || !extractInstagramInfo(url)) {
-          showNotification("Please enter valid Instagram post or reel URLs", true);
+        if (!url.includes("instagram.com")) {
+          showNotification("Please enter valid Instagram URLs");
           return;
         }
       }
-      
-      const settings = JSON.parse(localStorage.getItem('transcriptionSettings')) || { language: 'en', punctuation: true };
       
       document.getElementById("progress-container").style.display = "block";
       const progressBar = document.getElementById("progress-bar");
       const progressStatus = document.getElementById("progress-status");
       const resultsContainer = document.getElementById("results-container");
       const transcriptResults = document.getElementById("transcript-results");
-      
       transcriptResults.innerHTML = "";
       resultsContainer.style.display = "none";
+      document.getElementById("live-transcript").style.display = "none";
       
       try {
+        const settings = JSON.parse(localStorage.getItem('transcriptionSettings')) || { language: 'en', punctuation: true };
+        const response = await fetch('http://localhost:3000/api/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls, settings })
+        });
+        const { jobIds } = await response.json();
         const results = [];
-        
-        for (let i = 0; i < urls.length; i++) {
-          const url = urls[i];
-          const progress = ((i + 1) / urls.length) * 100;
+        for (let jobId of jobIds) {
+          let job;
+          do {
+            const statusResponse = await fetch(`http://localhost:3000/api/status/${jobId}`);
+            job = await statusResponse.json();
+            progressBar.style.width = `${job.progress}%`;
+            progressStatus.textContent = `Processing... ${job.status}`;
+            if (job.partialTranscript) {
+              updateLiveTranscript(job.partialTranscript);
+            }
+            await new Promise(r => setTimeout(r, 3000));
+          } while (job.status !== 'completed' && job.status !== 'error');
           
-          progressBar.style.width = `${progress}%`;
-          progressStatus.textContent = `Processing ${i + 1}/${urls.length}: ${url}`;
-          
-          try {
-            // Step 1: Extract audio from Instagram (simulated)
-            progressStatus.textContent = `Extracting audio from Instagram video ${i + 1}/${urls.length}...`;
-            showNotification("Note: This is a demo. In production, audio extraction from Instagram videos would require additional services.", false);
-            
-            // For demo purposes, we'll simulate the process
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Simulate error for demo
-            throw new Error("Instagram audio extraction requires additional backend services. This is a frontend-only demo.");
-            
-          } catch (error) {
-            console.error(`Error processing ${url}:`, error);
-            results.push({ 
-              url, 
-              error: error.message || 'Failed to process Instagram video'
-            });
+          if (job.status === 'completed') {
+            results.push({ url: job.url, transcript: job.transcript });
+          } else {
+            results.push({ url: job.url, error: job.error || 'Failed to process' });
           }
         }
-        
-        // Display results
         resultsContainer.style.display = "block";
-        
         for (let result of results) {
           const item = document.createElement("div");
           item.className = "transcript-item";
-          
           const urlElem = document.createElement("div");
           urlElem.className = "transcript-url";
           urlElem.textContent = result.url;
           item.appendChild(urlElem);
-          
           if (result.error) {
             const errElem = document.createElement("div");
             errElem.className = "error-message";
-            errElem.innerHTML = `
-              <strong>Error:</strong> ${result.error}<br><br>
-              <strong>Note:</strong> Instagram video transcription requires backend services to extract audio from videos. 
-              This demo shows the frontend interface. To make this fully functional, you would need:
-              <br>• A backend service to download Instagram videos
-              <br>• Audio extraction capabilities
-              <br>• Proper Instagram API integration
-            `;
+            errElem.textContent = `Error: ${result.error}`;
             item.appendChild(errElem);
           } else {
             const textElem = document.createElement("div");
             textElem.className = "transcript-text";
             textElem.textContent = result.transcript;
             item.appendChild(textElem);
-            
-            // Buttons for actions
+            // Buttons for Download, Copy, Export PDF, and Import to ChatGPT
             const btnGroup = document.createElement("div");
             btnGroup.className = "btn-group";
-            
             const downloadBtn = document.createElement("button");
-            downloadBtn.textContent = "📥 Download";
+            downloadBtn.textContent = "Download";
             downloadBtn.onclick = () => downloadTranscript(result.url, result.transcript);
             btnGroup.appendChild(downloadBtn);
-            
             const copyBtn = document.createElement("button");
-            copyBtn.textContent = "📋 Copy";
+            copyBtn.textContent = "Copy";
             copyBtn.onclick = () => copyTranscript(result.transcript);
             btnGroup.appendChild(copyBtn);
-            
+            const pdfBtn = document.createElement("button");
+            pdfBtn.textContent = "Export PDF";
+            pdfBtn.onclick = () => exportPDF(result.url, result.transcript);
+            btnGroup.appendChild(pdfBtn);
             const importBtn = document.createElement("button");
-            importBtn.textContent = "🤖 Send to ChatGPT";
-            importBtn.className = "chatgpt";
+            importBtn.textContent = "Import to ChatGPT";
             importBtn.onclick = () => importToChatGPT(result.transcript);
             btnGroup.appendChild(importBtn);
-            
             item.appendChild(btnGroup);
+            
+            // Social Sharing Button (Twitter)
+            const shareDiv = document.createElement("div");
+            shareDiv.className = "social-share";
+            const twitterBtn = document.createElement("button");
+            twitterBtn.textContent = "Share on Twitter";
+            twitterBtn.onclick = () => shareOnTwitter(result.transcript);
+            shareDiv.appendChild(twitterBtn);
+            item.appendChild(shareDiv);
+            
+            // Save transcript to history
+            saveToHistory(result);
           }
-          
           transcriptResults.appendChild(item);
         }
-        
-        progressStatus.textContent = "Process completed";
+        progressStatus.textContent = "Transcription Completed";
         document.getElementById("back-to-top").style.display = "flex";
-        
       } catch (error) {
         console.error('Transcription error:', error);
-        showNotification("Failed to process Instagram videos", true);
-        progressStatus.textContent = "Error occurred";
+        showNotification("Failed to transcribe videos");
       }
     }
     
     // Download Transcript as Text File
     function downloadTranscript(url, transcript) {
-      const postId = extractInstagramInfo(url) || 'instagram';
-      const filename = `instagram_${postId}_transcript.txt`;
+      let filename = "transcript";
+      const match = url.match(/\/p\/([^\/]+)/);
+      if (match && match[1]) {
+        filename = `instagram_${match[1]}_transcript`;
+      }
       const element = document.createElement('a');
       const file = new Blob([transcript], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
-      element.download = filename;
+      element.download = `${filename}.txt`;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
-      showNotification("Transcript downloaded");
     }
     
     // Copy Transcript to Clipboard
     function copyTranscript(transcript) {
       navigator.clipboard.writeText(transcript)
         .then(() => showNotification("Transcript copied to clipboard"))
-        .catch(() => showNotification("Failed to copy transcript", true));
+        .catch(() => showNotification("Failed to copy transcript"));
     }
     
-    // Import Transcript to ChatGPT
+    // Export Transcript as PDF using jsPDF
+    function exportPDF(url, transcript) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text(transcript, 10, 10);
+      let filename = "transcript";
+      const match = url.match(/\/p\/([^\/]+)/);
+      if (match && match[1]) {
+        filename = `instagram_${match[1]}_transcript`;
+      }
+      doc.save(`${filename}.pdf`);
+    }
+    
+    // Import Transcript to ChatGPT: Copy transcript and open ChatGPT
     function importToChatGPT(transcript) {
       navigator.clipboard.writeText(transcript)
         .then(() => {
           window.open('https://chat.openai.com/', '_blank');
           showNotification("Transcript copied! Paste it into ChatGPT.");
         })
-        .catch(() => showNotification("Failed to copy transcript", true));
+        .catch(() => showNotification("Failed to copy transcript."));
+    }
+    
+    // Social Sharing on Twitter
+    function shareOnTwitter(transcript) {
+      const tweet = encodeURIComponent(transcript.substring(0, 240));
+      const shareUrl = `https://twitter.com/intent/tweet?text=${tweet}`;
+      window.open(shareUrl, '_blank');
+    }
+    
+    // Save Transcript to History (localStorage)
+    function saveToHistory(result) {
+      let history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
+      history.push(result);
+      localStorage.setItem('transcriptHistory', JSON.stringify(history));
+      displayHistory();
+    }
+    
+    // Display Transcript History
+    function displayHistory() {
+      const history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
+      const container = document.getElementById('history-items');
+      container.innerHTML = "";
+      history.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.textContent = item.url;
+        container.appendChild(div);
+      });
+      document.getElementById('history-container').style.display = history.length ? "block" : "none";
+    }
+    
+    // Clear Transcript History
+    function clearHistory() {
+      localStorage.removeItem('transcriptHistory');
+      displayHistory();
+      showNotification("History cleared");
     }
     
     // Scroll to Top Functionality
@@ -749,16 +691,11 @@
       document.getElementById("back-to-top").style.display = window.scrollY > 300 ? "flex" : "none";
     });
     
-    // Initialize
-    loadSettings();
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-      const modal = document.getElementById('settings-modal');
-      if (e.target === modal) {
-        closeSettings();
-      }
+    // Initialize: Set blur event for initial URL input & display history
+    document.querySelectorAll("#url-container input[type='url']").forEach(input => {
+      input.addEventListener("blur", function() { updateThumbnail(this); });
     });
+    displayHistory();
   </script>
 </body>
 </html>
