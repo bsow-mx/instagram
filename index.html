@@ -1,701 +1,681 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instagram Video Transcription</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Video Transcriber</title>
   <style>
-    /* CSS Variables & Reset */
     :root {
-      --primary-color: #3897f0;
-      --secondary-color: #f44336;
-      --accent-color: #4CAF50;
-      --success-color: #27ae60;
-      --bg-color: #fafafa;
-      --container-bg: #ffffff;
-      --text-color: #262626;
-      --border-color: #dbdbdb;
-      --light-text: #8e8e8e;
+      --primary: #833AB4;
+      --secondary: #FD1D1D;
+      --accent: #F77737;
+      --success: #4cc9f0;
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --text: #262626;
+      --text-light: #8e8e8e;
+      --border: #dbdbdb;
+      --error: #ed4956;
     }
-    /* Dark Mode */
-    body.dark {
-      --bg-color: #121212;
-      --container-bg: #1e1e1e;
-      --text-color: #e0e0e0;
-      --border-color: #333;
-      --light-text: #aaa;
-    }
+
     * {
-      box-sizing: border-box;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
+
     body {
-      background-color: var(--bg-color);
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      transition: background-color 0.4s ease, color 0.4s ease;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
     }
-    /* Dark Mode Toggle */
-    .dark-mode-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      outline: none;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      transition: transform 0.2s ease;
-    }
-    .dark-mode-toggle:hover {
-      transform: scale(1.1);
-    }
-    /* Container */
+
     .container {
-      background-color: var(--container-bg);
       max-width: 800px;
-      width: 100%;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 0.8s ease-out;
-      position: relative;
+      margin: 2rem auto;
+      padding: 2rem;
     }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      animation: slideUp 0.6s ease-out;
+    }
+
     @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Headings */
-    h1, h2 {
-      text-align: center;
-      color: var(--text-color);
-      margin-bottom: 30px;
+
+    .input-group {
+      margin-bottom: 1.5rem;
     }
-    /* URL Input */
+
     .url-input {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      position: relative;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
     }
-    .url-input input {
-      flex-grow: 1;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-      background-color: transparent;
-      color: var(--text-color);
-    }
-    .url-input input:focus {
+
+    .url-input:focus {
       outline: none;
-      border-color: var(--primary-color);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.1);
     }
-    .url-input button.remove-btn {
-      background-color: var(--secondary-color);
+
+    .btn {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 0 15px;
-      margin-left: 10px;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .url-input button.remove-btn:hover {
-      transform: scale(1.03);
-    }
-    .thumbnail-preview {
-      width: 50px;
-      height: 50px;
-      margin-left: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      object-fit: cover;
-      display: none;
-    }
-    /* Buttons */
-    .add-url, .start-button, .settings-btn {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 15px;
-      font-size: 14px;
-      margin-bottom: 20px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .start-button {
-      background-color: var(--primary-color);
-      width: 100%;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .add-url:hover, .start-button:hover, .settings-btn:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    /* Settings Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+      display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
+      width: 100%;
       justify-content: center;
-      z-index: 1001;
     }
-    .modal-content {
-      background-color: var(--container-bg);
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-      animation: fadeIn 0.4s ease;
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(131, 58, 180, 0.3);
     }
-    .modal-close {
-      float: right;
-      cursor: pointer;
-      font-size: 20px;
+
+    .btn:disabled {
+      background: var(--text-light);
+      cursor: not-allowed;
+      transform: none;
     }
-    /* Progress */
+
     .progress-container {
-      margin-top: 30px;
       display: none;
+      margin: 2rem 0;
     }
-    .progress-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: var(--text-color);
-    }
+
     .progress-bar {
-      height: 20px;
-      background-color: #efefef;
-      border-radius: 10px;
-      margin-bottom: 5px;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
       overflow: hidden;
+      margin-bottom: 1rem;
     }
-    .progress-bar-inner {
+
+    .progress-fill {
       height: 100%;
-      background-color: var(--primary-color);
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
       width: 0%;
       transition: width 0.3s ease;
     }
+
     .progress-status {
-      font-size: 14px;
-      color: var(--light-text);
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
     }
-    /* Live Transcription Preview */
-    .live-transcript {
-      margin-top: 15px;
-      padding: 10px;
-      background-color: #f2f2f2;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      color: var(--text-color);
-      display: none;
+
+    .progress-detail {
+      text-align: center;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-style: italic;
     }
-    /* Transcript Results */
+
     .results-container {
-      margin-top: 30px;
-      display: none;
+      margin-top: 2rem;
     }
-    .transcript-item {
-      background-color: #f9f9f9;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 15px;
-      margin-bottom: 15px;
+
+    .result-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      animation: slideUp 0.6s ease-out;
     }
-    .transcript-url {
-      font-weight: bold;
-      margin-bottom: 10px;
-      word-break: break-all;
-      color: var(--text-color);
-    }
-    .transcript-text {
-      white-space: pre-wrap;
-      color: var(--text-color);
-      line-height: 1.5;
-      margin-bottom: 10px;
-    }
-    .btn-group button {
-      background-color: var(--success-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 15px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-right: 10px;
-      transition: transform 0.2s ease;
-    }
-    .btn-group button:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    /* Social Sharing Buttons */
-    .social-share {
-      margin-top: 10px;
-    }
-    .social-share button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      margin-right: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .social-share button:hover {
-      transform: scale(1.03);
-    }
-    /* Transcript History */
-    .history-container {
-      margin-top: 30px;
-      background-color: #fff;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 15px;
-    }
-    .history-item {
-      margin-bottom: 10px;
-      padding: 8px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .history-item:last-child {
-      border-bottom: none;
-    }
-    .history-header {
+
+    .result-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      color: var(--text-color);
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
     }
-    .clear-history {
-      background-color: var(--secondary-color);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
+
+    .result-title {
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
     }
-    .clear-history:hover {
-      transform: scale(1.03);
-    }
-    /* Back to Top */
-    .back-to-top {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background-color: var(--primary-color);
+
+    .action-btn:hover {
+      background: var(--primary);
       color: white;
-      border: none;
+      border-color: var(--primary);
+    }
+
+    .transcript-content {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .error-message {
+      color: var(--error);
+      text-align: center;
+      padding: 1rem;
+      background: rgba(237, 73, 86, 0.1);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      color: #1565c0;
+      font-size: 0.9rem;
+    }
+
+    .instagram-branding {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 2rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+      border-radius: 16px;
+      color: white;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--border);
       border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      cursor: pointer;
-      display: none;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .url-list {
+      margin-top: 1rem;
+    }
+
+    .url-item {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      z-index: 1000;
-      transition: opacity 0.3s ease;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background: var(--bg);
+      border-radius: 6px;
     }
-    /* Notification */
-    .notification {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: var(--secondary-color);
+
+    .url-item-text {
+      flex: 1;
+      word-break: break-all;
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .remove-btn {
+      background: var(--error);
       color: white;
-      padding: 10px 20px;
+      border: none;
+      padding: 0.3rem 0.8rem;
       border-radius: 4px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      z-index: 1002;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
     }
-    .notification.show {
-      opacity: 1;
+
+    .remove-btn:hover {
+      background: #dc2626;
+    }
+
+    .add-url-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .add-url-btn:hover {
+      background: #41b3d3;
     }
   </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle -->
-  <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">🌓</button>
   <div class="container">
-    <h1>Instagram Video Transcription</h1>
-    <!-- Settings Button -->
-    <button class="settings-btn" onclick="openSettings()" aria-label="Open Settings">Settings</button>
-    
-    <!-- URL Input Section -->
-    <div id="url-container">
-      <div class="url-input">
-        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
-        <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
-        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
+    <div class="header">
+      <h1>Instagram Video Transcriber</h1>
+      <p class="subtitle">Transkribiere Instagram Videos & Reels automatisch</p>
+    </div>
+
+    <div class="card">
+      <div class="info-box">
+        ℹ️ <strong>Hinweis:</strong> Diese App funktioniert mit öffentlichen Instagram Videos und Reels. 
+        Füge einfach die URL ein und die Transkription startet automatisch!
+      </div>
+
+      <div class="input-group">
+        <input 
+          type="url" 
+          class="url-input" 
+          id="url-input"
+          placeholder="https://www.instagram.com/p/XXXXXX/ oder /reel/XXXXXX/" 
+        />
+        <button class="add-url-btn" onclick="addUrl()">+ URL hinzufügen</button>
+        <div class="url-list" id="url-list"></div>
+      </div>
+
+      <button class="btn" onclick="startTranscription()" id="transcribe-btn">
+        <span class="loader" style="display: none;"></span>
+        <span id="btn-text">Videos transkribieren</span>
+      </button>
+
+      <div class="progress-container" id="progress-container">
+        <div class="progress-status" id="progress-status">Initialisiere...</div>
+        <div class="progress-detail" id="progress-detail"></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
       </div>
     </div>
-    <button class="add-url" onclick="addURLField()" aria-label="Add Another URL">+ Add Another URL</button>
-    <button class="start-button" onclick="startTranscription()" aria-label="Start Transcription">Start Transcription</button>
-    
-    <!-- Progress & Live Preview -->
-    <div class="progress-container" id="progress-container">
-      <p class="progress-title">Transcription Progress</p>
-      <div class="progress-bar">
-        <div class="progress-bar-inner" id="progress-bar"></div>
-      </div>
-      <p class="progress-status" id="progress-status">Processing... (0/0)</p>
-    </div>
-    <div class="live-transcript" id="live-transcript"></div>
-    
-    <!-- Transcription Results -->
-    <div class="results-container" id="results-container">
-      <h2>Transcription Results</h2>
-      <div id="transcript-results"></div>
-    </div>
-    
-    <!-- Transcript History -->
-    <div class="history-container" id="history-container" style="display:none;">
-      <div class="history-header">
-        <h2>Transcript History</h2>
-        <button class="clear-history" onclick="clearHistory()" aria-label="Clear History">Clear</button>
-      </div>
-      <div id="history-items"></div>
+
+    <div class="results-container" id="results-container"></div>
+
+    <div class="instagram-branding">
+      <h3>Instagram Transcriber</h3>
+      <p>@max.bsow</p>
     </div>
   </div>
-  
-  <!-- Back to Top Button -->
-  <button class="back-to-top" id="back-to-top" onclick="scrollToTop()" aria-label="Back to Top">↑</button>
-  
-  <!-- Settings Modal -->
-  <div class="modal" id="settings-modal" aria-modal="true" role="dialog">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeSettings()" aria-label="Close Settings">&times;</span>
-      <h2>Settings</h2>
-      <label for="language">Transcription Language:</label>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="es">Spanish</option>
-        <!-- More languages as needed -->
-      </select>
-      <br/><br/>
-      <label for="punctuation">Punctuation:</label>
-      <input type="checkbox" id="punctuation" checked>
-      <br/><br/>
-      <button onclick="saveSettings()">Save Settings</button>
-    </div>
-  </div>
-  
-  <!-- Notification -->
-  <div class="notification" id="notification"></div>
-  
-  <!-- jsPDF for PDF Export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
+
   <script>
-    // Dark Mode Toggle
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-    }
+    // Assembly AI API Key
+    const API_KEY = 'b9b496027b404fe8ad26320eddd30eaa';
     
-    // Settings Modal Functions
-    function openSettings() {
-      document.getElementById('settings-modal').style.display = 'flex';
-    }
-    function closeSettings() {
-      document.getElementById('settings-modal').style.display = 'none';
-    }
-    function saveSettings() {
-      const language = document.getElementById('language').value;
-      const punctuation = document.getElementById('punctuation').checked;
-      localStorage.setItem('transcriptionSettings', JSON.stringify({ language, punctuation }));
-      showNotification("Settings saved");
-      closeSettings();
-    }
+    // RapidAPI für Instagram Download (Kostenlose Tier)
+    const RAPID_API_KEY = 'c6e8e3fb1amsh4f3a2d6c9b4e8a7p1d6b4fjsn9c7f8e5d4a3b';
+    const RAPID_API_HOST = 'instagram-downloader-download-instagram-videos-stories.p.rapidapi.com';
     
-    // Notification Function
-    function showNotification(message) {
-      const notification = document.getElementById('notification');
-      notification.textContent = message;
-      notification.classList.add('show');
-      setTimeout(() => { notification.classList.remove('show'); }, 3000);
-    }
-    
-    // Add & Remove URL Inputs with Thumbnail Preview
-    function addURLField() {
-      const container = document.getElementById("url-container");
-      const urlDiv = document.createElement("div");
-      urlDiv.className = "url-input";
-      urlDiv.innerHTML = `
-        <input type="url" placeholder="Enter Instagram video URL" required aria-label="Instagram URL">
-        <button class="remove-btn" onclick="removeURLField(this)" aria-label="Remove URL">✕</button>
-        <img class="thumbnail-preview" src="" alt="Thumbnail Preview">
-      `;
-      urlDiv.querySelector("input").addEventListener("blur", function() {
-        updateThumbnail(this);
-      });
-      container.appendChild(urlDiv);
-    }
-    
-    function removeURLField(button) {
-      const container = document.getElementById("url-container");
-      if (container.children.length > 1) {
-        container.removeChild(button.parentElement);
-      }
-    }
-    
-    // Update Thumbnail Preview Based on URL Pattern
-    function updateThumbnail(input) {
+    let urls = [];
+    let isProcessing = false;
+
+    function addUrl() {
+      const input = document.getElementById('url-input');
       const url = input.value.trim();
-      const thumb = input.parentElement.querySelector('.thumbnail-preview');
-      if (url && url.includes("instagram.com")) {
-        const match = url.match(/\/p\/([^\/]+)/);
-        if (match && match[1]) {
-          thumb.src = `https://instagram.com/p/${match[1]}/media/?size=t`;
-          thumb.style.display = "block";
-        } else {
-          thumb.style.display = "none";
-        }
-      } else {
-        thumb.style.display = "none";
-      }
-    }
-    
-    // Update Live Transcription Preview (if partial transcript provided)
-    function updateLiveTranscript(text) {
-      const liveDiv = document.getElementById("live-transcript");
-      liveDiv.style.display = "block";
-      liveDiv.textContent = text;
-    }
-    
-    // Main Transcription Process
-    async function startTranscription() {
-      const inputs = document.querySelectorAll("#url-container input[type='url']");
-      const urls = Array.from(inputs).map(i => i.value.trim()).filter(url => url !== "");
-      if (urls.length === 0) {
-        showNotification("Please enter at least one Instagram URL");
+      
+      if (!url) return;
+      
+      const instagramPattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\/[a-zA-Z0-9_-]+\/?/;
+      if (!instagramPattern.test(url)) {
+        alert('Bitte gib eine gültige Instagram Post oder Reel URL ein.');
         return;
       }
-      for (let url of urls) {
-        if (!url.includes("instagram.com")) {
-          showNotification("Please enter valid Instagram URLs");
-          return;
-        }
+      
+      if (urls.includes(url)) {
+        alert('Diese URL wurde bereits hinzugefügt.');
+        return;
       }
       
-      document.getElementById("progress-container").style.display = "block";
-      const progressBar = document.getElementById("progress-bar");
-      const progressStatus = document.getElementById("progress-status");
-      const resultsContainer = document.getElementById("results-container");
-      const transcriptResults = document.getElementById("transcript-results");
-      transcriptResults.innerHTML = "";
-      resultsContainer.style.display = "none";
-      document.getElementById("live-transcript").style.display = "none";
+      urls.push(url);
+      input.value = '';
+      renderUrlList();
+    }
+
+    function removeUrl(index) {
+      urls.splice(index, 1);
+      renderUrlList();
+    }
+
+    function renderUrlList() {
+      const listContainer = document.getElementById('url-list');
+      listContainer.innerHTML = '';
+      
+      urls.forEach((url, index) => {
+        const item = document.createElement('div');
+        item.className = 'url-item';
+        item.innerHTML = `
+          <span class="url-item-text">${url}</span>
+          <button class="remove-btn" onclick="removeUrl(${index})">Entfernen</button>
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+
+    async function startTranscription() {
+      if (isProcessing || urls.length === 0) {
+        if (urls.length === 0) {
+          alert('Bitte füge mindestens eine Instagram URL hinzu.');
+        }
+        return;
+      }
+
+      isProcessing = true;
+      const btn = document.getElementById('transcribe-btn');
+      const loader = btn.querySelector('.loader');
+      const btnText = document.getElementById('btn-text');
+      
+      loader.style.display = 'inline-block';
+      btnText.textContent = 'Verarbeite...';
+      btn.disabled = true;
+      
+      document.getElementById('progress-container').style.display = 'block';
+      document.getElementById('results-container').innerHTML = '';
       
       try {
-        const settings = JSON.parse(localStorage.getItem('transcriptionSettings')) || { language: 'en', punctuation: true };
-        const response = await fetch('http://localhost:3000/api/transcribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urls, settings })
-        });
-        const { jobIds } = await response.json();
-        const results = [];
-        for (let jobId of jobIds) {
-          let job;
-          do {
-            const statusResponse = await fetch(`http://localhost:3000/api/status/${jobId}`);
-            job = await statusResponse.json();
-            progressBar.style.width = `${job.progress}%`;
-            progressStatus.textContent = `Processing... ${job.status}`;
-            if (job.partialTranscript) {
-              updateLiveTranscript(job.partialTranscript);
-            }
-            await new Promise(r => setTimeout(r, 3000));
-          } while (job.status !== 'completed' && job.status !== 'error');
+        for (let i = 0; i < urls.length; i++) {
+          const url = urls[i];
+          updateProgress((i / urls.length) * 100, `Video ${i + 1} von ${urls.length}`, 'Lade Instagram Video...');
           
-          if (job.status === 'completed') {
-            results.push({ url: job.url, transcript: job.transcript });
-          } else {
-            results.push({ url: job.url, error: job.error || 'Failed to process' });
-          }
-        }
-        resultsContainer.style.display = "block";
-        for (let result of results) {
-          const item = document.createElement("div");
-          item.className = "transcript-item";
-          const urlElem = document.createElement("div");
-          urlElem.className = "transcript-url";
-          urlElem.textContent = result.url;
-          item.appendChild(urlElem);
-          if (result.error) {
-            const errElem = document.createElement("div");
-            errElem.className = "error-message";
-            errElem.textContent = `Error: ${result.error}`;
-            item.appendChild(errElem);
-          } else {
-            const textElem = document.createElement("div");
-            textElem.className = "transcript-text";
-            textElem.textContent = result.transcript;
-            item.appendChild(textElem);
-            // Buttons for Download, Copy, Export PDF, and Import to ChatGPT
-            const btnGroup = document.createElement("div");
-            btnGroup.className = "btn-group";
-            const downloadBtn = document.createElement("button");
-            downloadBtn.textContent = "Download";
-            downloadBtn.onclick = () => downloadTranscript(result.url, result.transcript);
-            btnGroup.appendChild(downloadBtn);
-            const copyBtn = document.createElement("button");
-            copyBtn.textContent = "Copy";
-            copyBtn.onclick = () => copyTranscript(result.transcript);
-            btnGroup.appendChild(copyBtn);
-            const pdfBtn = document.createElement("button");
-            pdfBtn.textContent = "Export PDF";
-            pdfBtn.onclick = () => exportPDF(result.url, result.transcript);
-            btnGroup.appendChild(pdfBtn);
-            const importBtn = document.createElement("button");
-            importBtn.textContent = "Import to ChatGPT";
-            importBtn.onclick = () => importToChatGPT(result.transcript);
-            btnGroup.appendChild(importBtn);
-            item.appendChild(btnGroup);
+          try {
+            // Erstelle Ergebnis-Card
+            const resultCard = createResultCard(url, 'Lade Video herunter...');
             
-            // Social Sharing Button (Twitter)
-            const shareDiv = document.createElement("div");
-            shareDiv.className = "social-share";
-            const twitterBtn = document.createElement("button");
-            twitterBtn.textContent = "Share on Twitter";
-            twitterBtn.onclick = () => shareOnTwitter(result.transcript);
-            shareDiv.appendChild(twitterBtn);
-            item.appendChild(shareDiv);
+            // Schritt 1: Video-URL von Instagram abrufen
+            updateResultCard(resultCard, 'Rufe Video-Informationen ab...');
+            const videoUrl = await getInstagramVideoUrl(url);
             
-            // Save transcript to history
-            saveToHistory(result);
+            if (!videoUrl) {
+              throw new Error('Video konnte nicht gefunden werden. Stelle sicher, dass es öffentlich ist.');
+            }
+            
+            // Schritt 2: Video als Audio an Assembly AI senden
+            updateResultCard(resultCard, 'Lade Audio hoch...');
+            updateProgress((i / urls.length) * 100 + 20, `Video ${i + 1} von ${urls.length}`, 'Lade Audio zu Assembly AI...');
+            
+            const uploadUrl = await uploadAudioFromUrl(videoUrl);
+            
+            // Schritt 3: Transkription starten
+            updateResultCard(resultCard, 'Starte Transkription...');
+            updateProgress((i / urls.length) * 100 + 40, `Video ${i + 1} von ${urls.length}`, 'Transkribiere Audio...');
+            
+            const transcriptionId = await startTranscriptionJob(uploadUrl);
+            
+            // Schritt 4: Auf Ergebnis warten
+            updateResultCard(resultCard, 'Warte auf Transkription...');
+            const transcript = await pollTranscriptionResult(transcriptionId, (status) => {
+              updateProgress((i / urls.length) * 100 + 60, `Video ${i + 1} von ${urls.length}`, `Transkription läuft: ${status}`);
+            });
+            
+            // Schritt 5: Ergebnis anzeigen
+            updateResultCard(resultCard, transcript || 'Keine Transkription verfügbar', true);
+            
+          } catch (error) {
+            console.error(`Fehler bei ${url}:`, error);
+            const errorCard = createResultCard(url, `Fehler: ${error.message}`, true);
+            errorCard.querySelector('.transcript-content').style.color = 'var(--error)';
           }
-          transcriptResults.appendChild(item);
+          
+          updateProgress(((i + 1) / urls.length) * 100, `${i + 1} von ${urls.length} Videos verarbeitet`, 'Abgeschlossen');
         }
-        progressStatus.textContent = "Transcription Completed";
-        document.getElementById("back-to-top").style.display = "flex";
+        
+        updateProgress(100, 'Alle Videos wurden verarbeitet!', '✓ Fertig');
+        
+      } finally {
+        isProcessing = false;
+        loader.style.display = 'none';
+        btnText.textContent = 'Videos transkribieren';
+        btn.disabled = false;
+        
+        // Clear URLs nach erfolgreicher Verarbeitung
+        urls = [];
+        renderUrlList();
+      }
+    }
+
+    async function getInstagramVideoUrl(instagramUrl) {
+      // Verwende einen kostenlosen Proxy-Service für Instagram
+      try {
+        // Option 1: Verwende einen Instagram Download Service
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(instagramUrl)}`);
+        const html = await response.text();
+        
+        // Suche nach Video-URL im HTML
+        const videoMatch = html.match(/"video_url":"([^"]+)"/);
+        if (videoMatch && videoMatch[1]) {
+          return videoMatch[1].replace(/\\u0026/g, '&');
+        }
+        
+        // Alternative: Suche nach meta property
+        const metaMatch = html.match(/<meta property="og:video" content="([^"]+)"/);
+        if (metaMatch && metaMatch[1]) {
+          return metaMatch[1];
+        }
+        
+        throw new Error('Video-URL konnte nicht extrahiert werden');
       } catch (error) {
-        console.error('Transcription error:', error);
-        showNotification("Failed to transcribe videos");
+        console.error('Fehler beim Abrufen der Video-URL:', error);
+        throw error;
       }
     }
-    
-    // Download Transcript as Text File
-    function downloadTranscript(url, transcript) {
-      let filename = "transcript";
-      const match = url.match(/\/p\/([^\/]+)/);
-      if (match && match[1]) {
-        filename = `instagram_${match[1]}_transcript`;
-      }
-      const element = document.createElement('a');
-      const file = new Blob([transcript], {type: 'text/plain'});
-      element.href = URL.createObjectURL(file);
-      element.download = `${filename}.txt`;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-    
-    // Copy Transcript to Clipboard
-    function copyTranscript(transcript) {
-      navigator.clipboard.writeText(transcript)
-        .then(() => showNotification("Transcript copied to clipboard"))
-        .catch(() => showNotification("Failed to copy transcript"));
-    }
-    
-    // Export Transcript as PDF using jsPDF
-    function exportPDF(url, transcript) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text(transcript, 10, 10);
-      let filename = "transcript";
-      const match = url.match(/\/p\/([^\/]+)/);
-      if (match && match[1]) {
-        filename = `instagram_${match[1]}_transcript`;
-      }
-      doc.save(`${filename}.pdf`);
-    }
-    
-    // Import Transcript to ChatGPT: Copy transcript and open ChatGPT
-    function importToChatGPT(transcript) {
-      navigator.clipboard.writeText(transcript)
-        .then(() => {
-          window.open('https://chat.openai.com/', '_blank');
-          showNotification("Transcript copied! Paste it into ChatGPT.");
+
+    async function uploadAudioFromUrl(videoUrl) {
+      // Assembly AI unterstützt direkte URL-Uploads
+      const response = await fetch('https://api.assemblyai.com/v2/upload', {
+        method: 'POST',
+        headers: {
+          'authorization': API_KEY,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          audio_url: videoUrl
         })
-        .catch(() => showNotification("Failed to copy transcript."));
-    }
-    
-    // Social Sharing on Twitter
-    function shareOnTwitter(transcript) {
-      const tweet = encodeURIComponent(transcript.substring(0, 240));
-      const shareUrl = `https://twitter.com/intent/tweet?text=${tweet}`;
-      window.open(shareUrl, '_blank');
-    }
-    
-    // Save Transcript to History (localStorage)
-    function saveToHistory(result) {
-      let history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
-      history.push(result);
-      localStorage.setItem('transcriptHistory', JSON.stringify(history));
-      displayHistory();
-    }
-    
-    // Display Transcript History
-    function displayHistory() {
-      const history = JSON.parse(localStorage.getItem('transcriptHistory')) || [];
-      const container = document.getElementById('history-items');
-      container.innerHTML = "";
-      history.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "history-item";
-        div.textContent = item.url;
-        container.appendChild(div);
       });
-      document.getElementById('history-container').style.display = history.length ? "block" : "none";
+      
+      if (!response.ok) {
+        // Fallback: Lade Video herunter und sende es
+        const videoResponse = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(videoUrl)}`);
+        const videoBlob = await videoResponse.blob();
+        
+        const uploadResponse = await fetch('https://api.assemblyai.com/v2/upload', {
+          method: 'POST',
+          headers: {
+            'authorization': API_KEY,
+            'content-type': 'application/octet-stream'
+          },
+          body: videoBlob
+        });
+        
+        const data = await uploadResponse.json();
+        return data.upload_url;
+      }
+      
+      const data = await response.json();
+      return data.upload_url || videoUrl;
     }
-    
-    // Clear Transcript History
-    function clearHistory() {
-      localStorage.removeItem('transcriptHistory');
-      displayHistory();
-      showNotification("History cleared");
+
+    async function startTranscriptionJob(audioUrl) {
+      const response = await fetch('https://api.assemblyai.com/v2/transcript', {
+        method: 'POST',
+        headers: {
+          'authorization': API_KEY,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          audio_url: audioUrl,
+          language_detection: true
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Transkription konnte nicht gestartet werden');
+      }
+      
+      const data = await response.json();
+      return data.id;
     }
-    
-    // Scroll to Top Functionality
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    async function pollTranscriptionResult(transcriptId, onProgress) {
+      let attempts = 0;
+      const maxAttempts = 60;
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        
+        const response = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+          headers: { 'authorization': API_KEY }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Fehler beim Abrufen der Transkription');
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'completed') {
+          return data.text;
+        } else if (data.status === 'error') {
+          throw new Error(data.error || 'Transkription fehlgeschlagen');
+        }
+        
+        if (onProgress) {
+          onProgress(data.status);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      throw new Error('Transkription Timeout');
     }
-    
-    // Back-to-Top Button Visibility
-    window.addEventListener('scroll', () => {
-      document.getElementById("back-to-top").style.display = window.scrollY > 300 ? "flex" : "none";
+
+    function updateProgress(percentage, status, detail = '') {
+      document.getElementById('progress-fill').style.width = `${percentage}%`;
+      document.getElementById('progress-status').textContent = status;
+      document.getElementById('progress-detail').textContent = detail;
+    }
+
+    function createResultCard(url, initialContent, isComplete = false) {
+      const container = document.getElementById('results-container');
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="result-header">
+          <div class="result-title">${url}</div>
+          <div class="result-actions" style="display: ${isComplete ? 'flex' : 'none'};">
+            <button class="action-btn" onclick="copyTranscript(this)">Kopieren</button>
+            <button class="action-btn" onclick="downloadTranscript(this)">Download</button>
+          </div>
+        </div>
+        <div class="transcript-content">${initialContent}</div>
+      `;
+      container.appendChild(card);
+      return card;
+    }
+
+    function updateResultCard(card, content, isComplete = false) {
+      card.querySelector('.transcript-content').textContent = content;
+      if (isComplete) {
+        card.querySelector('.result-actions').style.display = 'flex';
+      }
+    }
+
+    function copyTranscript(button) {
+      const card = button.closest('.result-card');
+      const transcript = card.querySelector('.transcript-content').textContent;
+      navigator.clipboard.writeText(transcript).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Kopiert!';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    function downloadTranscript(button) {
+      const card = button.closest('.result-card');
+      const url = card.querySelector('.result-title').textContent;
+      const transcript = card.querySelector('.transcript-content').textContent;
+      
+      const blob = new Blob([transcript], { type: 'text/plain' });
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `instagram_transcript_${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+    }
+
+    // Enter-Taste zum Hinzufügen von URLs
+    document.getElementById('url-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addUrl();
+      }
     });
-    
-    // Initialize: Set blur event for initial URL input & display history
-    document.querySelectorAll("#url-container input[type='url']").forEach(input => {
-      input.addEventListener("blur", function() { updateThumbnail(this); });
-    });
-    displayHistory();
   </script>
 </body>
 </html>
