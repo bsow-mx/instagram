@@ -373,16 +373,15 @@
 
     <div class="card">
       <div class="info-box">
-        ℹ️ <strong>Hinweis:</strong> Diese App funktioniert mit öffentlichen Instagram Videos und Reels. 
-        Füge einfach die URL ein und die Transkription startet automatisch!
+        Füge einen <strong>öffentlichen</strong> Instagram Post- oder Reel-Link ein und klicke auf Transkribieren.
       </div>
 
       <div class="input-group">
-        <input 
-          type="url" 
-          class="url-input" 
+        <input
+          type="url"
+          class="url-input"
           id="url-input"
-          placeholder="https://www.instagram.com/p/XXXXXX/ oder /reel/XXXXXX/" 
+          placeholder="https://www.instagram.com/reel/XXXXXX/"
         />
         <button class="add-url-btn" onclick="addUrl()">+ URL hinzufügen</button>
         <div class="url-list" id="url-list"></div>
@@ -414,9 +413,7 @@
   </div>
 
   <script>
-    const API_KEY = 'b9b496027b404fe8ad26320eddd30eaa';
-    const RAPID_API_KEY = 'c6e8e3fb1amsh4f3a2d6c9b4e8a7p1d6b4fjsn9c7f8e5d4a3b';
-    const RAPID_API_HOST = 'instagram-downloader-download-instagram-videos-stories.p.rapidapi.com';
+    const API_KEY = '36e2d7090a154bee9487b5fd2a8362e3';
 
     let urls = [];
     let isProcessing = false;
@@ -475,9 +472,9 @@
       const url = input.value.trim();
       if (!url) return;
 
-      const pattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\/[a-zA-Z0-9_-]+\/?/;
+      const pattern = /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\/[a-zA-Z0-9_-]+/;
       if (!pattern.test(url)) {
-        alert('Bitte gib eine gültige Instagram Post oder Reel URL ein.');
+        alert('Bitte füge eine gültige Instagram Post- oder Reel-URL ein.\nBeispiel: https://www.instagram.com/reel/XXXXXX/');
         return;
       }
       if (urls.includes(url)) {
@@ -534,22 +531,17 @@
           const url = urls[i];
           const videoLabel = urls.length > 1 ? ` (${i + 1}/${urls.length})` : '';
 
-          // Step 1 – fetch Instagram video URL (5 → 30%)
-          setProgress(5, `Lade Instagram Video-URL${videoLabel}`, 'Verbinde mit Instagram API...');
+          // Step 1 – resolve direct video URL via cobalt (5 → 30%)
+          setProgress(5, `Lade Video-URL${videoLabel}`, 'Rufe direkten Download-Link ab...');
           const resultCard = createResultCard(url, 'Lade Video-Informationen...');
 
           let videoUrl;
           try {
-            videoUrl = await getInstagramVideoUrl(url);
+            videoUrl = await resolveVideoUrl(url);
           } catch (e) {
             updateResultCard(resultCard, `Fehler: ${e.message}`, true);
             resultCard.querySelector('.transcript-content').style.color = '#888';
-            setProgress(100 / urls.length * (i + 1), `Fehler bei Video${videoLabel}`, e.message, false);
-            continue;
-          }
-
-          if (!videoUrl) {
-            updateResultCard(resultCard, 'Fehler: Video nicht gefunden (öffentlich?)', true);
+            setProgress(100 / urls.length * (i + 1), `Fehler${videoLabel}`, e.message, false);
             continue;
           }
 
@@ -572,7 +564,6 @@
           let transcript;
           try {
             transcript = await pollTranscriptionResult(transcriptionId, (status, attempt) => {
-              // bar grows from 40% to 92%, ~1% per poll (every 2s)
               const pct = Math.min(40 + attempt * 1.3, 92);
               setProgress(pct,
                 `Transkribiere Audio${videoLabel}`,
@@ -606,41 +597,44 @@
     }
 
     // ── API calls ──────────────────────────────────────────────────────────
-    async function getInstagramVideoUrl(instagramUrl) {
-      const match = instagramUrl.match(/\/(p|reel)\/([a-zA-Z0-9_-]+)/);
-      if (!match) throw new Error('Ungültige Instagram URL');
 
-      const cleanUrl = `https://www.instagram.com/${match[1]}/${match[2]}/`;
-      const response = await fetch(
-        `https://${RAPID_API_HOST}/index?url=${encodeURIComponent(cleanUrl)}`,
-        {
-          headers: {
-            'X-RapidAPI-Key': RAPID_API_KEY,
-            'X-RapidAPI-Host': RAPID_API_HOST
-          }
-        }
-      );
+    // Uses cobalt.tools public API – free, no key needed
+    async function resolveVideoUrl(instagramUrl) {
+      const response = await fetch('https://api.cobalt.tools/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ url: instagramUrl })
+      });
 
-      if (!response.ok) throw new Error(`Instagram API Fehler: ${response.status}`);
+      if (response.status === 429) {
+        throw new Error('Zu viele Anfragen – bitte kurz warten und erneut versuchen.');
+      }
+      if (!response.ok) {
+        throw new Error(`Video-Abruf fehlgeschlagen (${response.status}). Ist das Video öffentlich?`);
+      }
 
       const data = await response.json();
 
-      if (data.media && Array.isArray(data.media)) {
-        const v = data.media.find(m => m.type === 'video' || (m.url && m.url.includes('.mp4')));
-        if (v && v.url) return v.url;
+      if (data.status === 'error') {
+        throw new Error(data.error?.code || 'Video konnte nicht abgerufen werden.');
       }
-      if (data.url && (data.url.includes('.mp4') || data.url.includes('video'))) return data.url;
-      if (data.downloadUrl) {
-        const list = Array.isArray(data.downloadUrl) ? data.downloadUrl : [data.downloadUrl];
-        const u = list.find(x => x.includes('.mp4') || x.includes('video'));
-        if (u) return u;
-      }
-      if (data.download && Array.isArray(data.download)) {
-        const v = data.download.find(m => m.url && (m.url.includes('.mp4') || m.type === 'video'));
-        if (v && v.url) return v.url;
+      if (data.status === 'rate-limit') {
+        throw new Error('Rate-Limit erreicht – bitte kurz warten.');
       }
 
-      throw new Error('Video-URL konnte nicht abgerufen werden. Ist das Video öffentlich?');
+      // direct URL (redirect / tunnel / stream)
+      if (data.url) return data.url;
+
+      // carousel / picker → take first video
+      if (data.status === 'picker' && Array.isArray(data.picker)) {
+        const video = data.picker.find(p => p.type === 'video' || p.url);
+        if (video?.url) return video.url;
+      }
+
+      throw new Error('Keine Video-URL in der Antwort gefunden. Ist der Post öffentlich?');
     }
 
     async function startTranscriptionJob(audioUrl) {
